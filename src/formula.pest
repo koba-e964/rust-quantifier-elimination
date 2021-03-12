@@ -1,7 +1,7 @@
-num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
+num = @{ int }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-var = { "x" }
+var = @{ ASCII_ALPHA+ }
 
 operation = _{ add | subtract | multiply | power }
     add      = { "+" }
@@ -12,6 +12,24 @@ operation = _{ add | subtract | multiply | power }
 expr = { term ~ (operation ~ term)* }
 term = _{ num | var | "(" ~ expr ~ ")" }
 
-calculation = _{ SOI ~ expr ~ EOI }
+comparison = _{ eq | ne | lt | gt | le | ge }
+    eq = { "=" }
+    ne = { "/=" }
+    lt = { "<" }
+    gt = { ">" }
+    le = { "<=" }
+    ge = { ">=" }
 
-WHITESPACE = _{ " " | "\t" }
+quant = _{ exists | forall }
+    exists = { "E" }
+    forall = { "A" }
+
+quant_var = { quant ~ var }
+
+prim_fml = { expr ~ comparison ~ expr }
+
+fml = { prim_fml | "(" ~ quant_var ~ ")" ~ fml }
+
+main = _{ SOI ~ fml ~ EOI }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
